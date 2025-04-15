@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -91,9 +92,24 @@ const Safety = () => {
                 )}
                 
                 <div className="flex flex-col sm:flex-row gap-3">
-                  <Button variant="outline" className="flex-1 border-[#7E69AB] text-[#7E69AB]">
-                    Emergency Calls
-                  </Button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" className="flex-1 border-[#7E69AB] text-[#7E69AB]">
+                        Emergency Calls
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl">
+                      <DialogHeader>
+                        <DialogTitle>Emergency Contacts</DialogTitle>
+                        <DialogDescription>
+                          Quickly call or message your emergency contacts
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="py-4">
+                        <EmergencyContacts />
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                   
                   <Dialog>
                     <DialogTrigger asChild>

@@ -36,7 +36,10 @@ export function EmergencyContacts() {
     mutationFn: async () => {
       const { error } = await supabase
         .from("emergency_contacts")
-        .insert([newContact]);
+        .insert([{
+          ...newContact,
+          user_id: (await supabase.auth.getUser()).data.user?.id
+        }]);
       
       if (error) throw error;
     },
