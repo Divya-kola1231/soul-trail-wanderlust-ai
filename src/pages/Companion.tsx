@@ -3,7 +3,9 @@ import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Send, Mic, MapPin, Info, Globe, User, Bot } from "lucide-react";
+import { Send, Mic, MapPin, Info, Globe, Bot } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 type Message = {
   id: string;
@@ -34,15 +36,7 @@ const Companion = () => {
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  // Responses for demo purposes
-  const demoResponses: { [key: string]: string } = {
-    "hello": "Hi there! How are you feeling today? Is there anything specific you'd like to know about your destination?",
-    "safety": "Your safety is important! Here are some tips: stay aware of your surroundings, keep emergency contacts handy, share your location with trusted friends, trust your intuition, and research local customs before you arrive.",
-    "lonely": "It's completely normal to feel lonely sometimes when traveling solo. Why not try joining a walking tour, visiting a local cafe, or using travel apps to connect with other travelers nearby?",
-    "food": "Exploring local cuisine is one of the joys of travel! Look for restaurants where locals eat, try street food in busy areas, and don't be afraid to ask your accommodation hosts for recommendations.",
-    "language": "Learning a few basic phrases in the local language can go a long way! 'Hello', 'thank you', 'please', and 'where is...' are good starting points. Would you like me to help you learn some phrases for your destination?",
-  };
+  const { toast } = useToast();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -52,7 +46,7 @@ const Companion = () => {
     scrollToBottom();
   }, [messages]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (input.trim() === "") return;
 
     // Add user message
@@ -67,28 +61,51 @@ const Companion = () => {
     setInput("");
     setIsTyping(true);
 
-    // Simulate buddy response
-    setTimeout(() => {
-      let responseText = "I'm not sure how to respond to that yet. As your AI travel buddy, I'm constantly learning. Can you try asking something about your destination, safety tips, or local recommendations?";
-      
-      // Simple keyword matching for demo
-      const lowercaseInput = input.toLowerCase();
-      Object.keys(demoResponses).forEach(keyword => {
-        if (lowercaseInput.includes(keyword)) {
-          responseText = demoResponses[keyword];
-        }
+    try {
+      // Call our Supabase Edge Function
+      const { data, error } = await supabase.functions.invoke("travel-buddy-chat", {
+        body: { 
+          message: input, 
+          messageHistory: messages.map(msg => ({
+            text: msg.text,
+            sender: msg.sender
+          }))
+        },
       });
 
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      // Add AI response
       const buddyMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: responseText,
+        text: data.reply,
         sender: "buddy",
         timestamp: new Date(),
       };
       
       setMessages((prev) => [...prev, buddyMessage]);
+    } catch (error) {
+      console.error("Error calling AI:", error);
+      toast({
+        title: "Error",
+        description: "Failed to get a response. Please try again.",
+        variant: "destructive",
+      });
+
+      // Add fallback message if AI fails
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: "I'm having trouble connecting right now. Please try again in a moment.",
+        sender: "buddy",
+        timestamp: new Date(),
+      };
+      
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
