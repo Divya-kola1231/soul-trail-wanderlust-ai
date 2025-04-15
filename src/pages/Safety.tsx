@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Shield, MapPin, AlertTriangle, CheckCircle } from "lucide-react";
+import { Card, CardHeader, CardContent, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Shield, MapPin, AlertTriangle, CheckCircle, Clock, Users } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { EmergencyContacts } from "@/components/safety/EmergencyContacts";
 import { SafetyAlerts } from "@/components/safety/SafetyAlerts";
