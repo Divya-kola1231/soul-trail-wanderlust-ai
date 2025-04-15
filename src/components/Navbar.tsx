@@ -1,13 +1,36 @@
-
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Compass, MessageSquare, Shield, BookOpen, Menu, X } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { User } from "@supabase/supabase-js";
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    // Initial check
+    supabase.auth.getSession().then(({ data }) => {
+      setUser(data.session?.user ?? null);
+    });
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate('/');
+  };
 
   const navItems = [
     { name: "Explore", path: "/explore", icon: <Compass className="h-4 w-4 mr-2" /> },
@@ -50,17 +73,35 @@ export const Navbar = () => {
 
           {/* Sign in / Sign up buttons */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button variant="outline" className="border-[#9b87f5] text-[#9b87f5]">
-              Sign In
-            </Button>
-            <Button className="bg-[#9b87f5] hover:bg-[#7E69AB] text-white">
-              Sign Up
-            </Button>
+            {!user ? (
+              <>
+                <Button 
+                  variant="outline" 
+                  className="border-[#9b87f5] text-[#9b87f5]"
+                  onClick={() => navigate('/auth')}
+                >
+                  Sign In
+                </Button>
+                <Button 
+                  className="bg-[#9b87f5] hover:bg-[#7E69AB] text-white"
+                  onClick={() => navigate('/auth')}
+                >
+                  Sign Up
+                </Button>
+              </>
+            ) : (
+              <Button 
+                className="bg-[#9b87f5] hover:bg-[#7E69AB] text-white"
+                onClick={handleSignOut}
+              >
+                Sign Out
+              </Button>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Mobile menu, show/hide based on menu state */}
+      {/* Mobile menu */}
       {isMenuOpen && (
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 bg-white border-b border-gray-100">
@@ -76,12 +117,36 @@ export const Navbar = () => {
               </Link>
             ))}
             <div className="pt-4 pb-3 border-t border-gray-200">
-              <Button variant="outline" className="border-[#9b87f5] text-[#9b87f5] w-full mb-2">
-                Sign In
-              </Button>
-              <Button className="bg-[#9b87f5] hover:bg-[#7E69AB] text-white w-full">
-                Sign Up
-              </Button>
+              {!user ? (
+                <>
+                  <Button 
+                    variant="outline" 
+                    className="border-[#9b87f5] text-[#9b87f5] w-full mb-2"
+                    onClick={() => {
+                      navigate('/auth');
+                      setIsMenuOpen(false);
+                    }}
+                  >
+                    Sign In
+                  </Button>
+                  <Button 
+                    className="bg-[#9b87f5] hover:bg-[#7E69AB] text-white w-full"
+                    onClick={() => {
+                      navigate('/auth');
+                      setIsMenuOpen(false);
+                    }}
+                  >
+                    Sign Up
+                  </Button>
+                </>
+              ) : (
+                <Button 
+                  className="bg-[#9b87f5] hover:bg-[#7E69AB] text-white w-full"
+                  onClick={handleSignOut}
+                >
+                  Sign Out
+                </Button>
+              )}
             </div>
           </div>
         </div>
