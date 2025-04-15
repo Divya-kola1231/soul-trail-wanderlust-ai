@@ -1,10 +1,10 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, Phone, MapPin, Bell, Clock, Users, AlertTriangle, CheckCircle } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Shield, MapPin, AlertTriangle, CheckCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { EmergencyContacts } from "@/components/safety/EmergencyContacts";
+import { SafetyAlerts } from "@/components/safety/SafetyAlerts";
 
 const Safety = () => {
   const [panicMode, setPanicMode] = useState(false);
@@ -92,57 +92,39 @@ const Safety = () => {
                 
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Button variant="outline" className="flex-1 border-[#7E69AB] text-[#7E69AB]">
-                    <Phone className="h-4 w-4 mr-2" />
                     Emergency Calls
                   </Button>
                   
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button variant="outline" className="flex-1 border-[#7E69AB] text-[#7E69AB]">
-                        <Bell className="h-4 w-4 mr-2" />
                         Safety Alerts
                       </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="max-w-2xl">
                       <DialogHeader>
                         <DialogTitle>Safety Alerts</DialogTitle>
                         <DialogDescription>
-                          Receive notifications about safety concerns in your area.
+                          Stay informed about safety concerns in your area
                         </DialogDescription>
                       </DialogHeader>
                       <div className="py-4">
-                        <div className="flex items-center justify-between mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                          <div className="flex items-center">
-                            <AlertTriangle className="h-5 w-5 text-amber-500 mr-3" />
-                            <div>
-                              <p className="font-medium text-amber-800">Protest Scheduled</p>
-                              <p className="text-sm text-amber-700">Central Plaza, 2pm-5pm</p>
-                            </div>
-                          </div>
-                          <span className="text-xs text-gray-500">1h ago</span>
-                        </div>
-                        
-                        <div className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                          <div className="flex items-center">
-                            <Bell className="h-5 w-5 text-blue-500 mr-3" />
-                            <div>
-                              <p className="font-medium text-blue-800">Weather Advisory</p>
-                              <p className="text-sm text-blue-700">Heavy rain expected tonight</p>
-                            </div>
-                          </div>
-                          <span className="text-xs text-gray-500">3h ago</span>
-                        </div>
+                        <SafetyAlerts />
                       </div>
-                      <DialogFooter>
-                        <Button className="w-full bg-[#9b87f5] hover:bg-[#7E69AB]">
-                          View All Alerts
-                        </Button>
-                      </DialogFooter>
                     </DialogContent>
                   </Dialog>
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16 px-4 md:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-2xl font-bold text-[#7E69AB] mb-6">Emergency Contacts</h2>
+            <EmergencyContacts />
           </div>
         </div>
       </section>
