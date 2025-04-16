@@ -11,25 +11,31 @@ export type Database = {
     Tables: {
       emergency_contacts: {
         Row: {
+          can_view_location: boolean | null
           created_at: string
           email: string | null
           id: number
           name: string | null
           "phone number": number | null
+          user_id: string | null
         }
         Insert: {
+          can_view_location?: boolean | null
           created_at?: string
           email?: string | null
           id?: number
           name?: string | null
           "phone number"?: number | null
+          user_id?: string | null
         }
         Update: {
+          can_view_location?: boolean | null
           created_at?: string
           email?: string | null
           id?: number
           name?: string | null
           "phone number"?: number | null
+          user_id?: string | null
         }
         Relationships: []
       }

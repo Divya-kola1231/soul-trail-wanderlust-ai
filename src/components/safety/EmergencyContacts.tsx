@@ -6,12 +6,14 @@ import { Phone, Plus, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Switch } from "@/components/ui/switch";
 
 type EmergencyContact = {
   id: number;
   name: string | null;
   phone: string | null;
   email: string | null;
+  can_view_location: boolean;
 };
 
 export function EmergencyContacts() {
@@ -29,29 +31,27 @@ export function EmergencyContacts() {
       
       if (error) throw error;
       
-      // Ensure the data matches our type by mapping it
       return (data || []).map(contact => ({
         id: contact.id,
         name: contact.name,
-        // Use the correct column name from the database
         phone: contact["phone number"] ? String(contact["phone number"]) : null,
-        email: contact.email
+        email: contact.email,
+        can_view_location: contact.can_view_location || false
       })) as EmergencyContact[];
     }
   });
 
   const addContactMutation = useMutation({
     mutationFn: async () => {
-      // Convert phone to number if provided
       const phoneNumber = newContact.phone ? Number(newContact.phone) : null;
       
       const { error } = await supabase
         .from("emergency_contacts")
         .insert([{
           name: newContact.name,
-          // Ensure we're using the correct column name for the database
           "phone number": phoneNumber,
           email: newContact.email,
+          can_view_location: false,
           user_id: (await supabase.auth.getUser()).data.user?.id
         }]);
       
@@ -70,6 +70,32 @@ export function EmergencyContacts() {
       toast({
         title: "Error",
         description: "Failed to add emergency contact.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const updateLocationSharingMutation = useMutation({
+    mutationFn: async ({ id, canViewLocation }: { id: number; canViewLocation: boolean }) => {
+      const { error } = await supabase
+        .from("emergency_contacts")
+        .update({ can_view_location: canViewLocation })
+        .eq("id", id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["emergency-contacts"] });
+      toast({
+        title: "Settings Updated",
+        description: "Location sharing settings have been updated.",
+      });
+    },
+    onError: (error) => {
+      console.error("Error updating location sharing:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update location sharing settings.",
         variant: "destructive",
       });
     }
@@ -140,13 +166,28 @@ export function EmergencyContacts() {
                 </div>
               </div>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => deleteContactMutation.mutate(contact.id)}
-            >
-              <Trash2 className="h-4 w-4 text-red-500" />
-            </Button>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-500">Share Location</span>
+                <Switch
+                  checked={contact.can_view_location}
+                  onCheckedChange={(checked) => 
+                    updateLocationSharingMutation.mutate({ 
+                      id: contact.id, 
+                      canViewLocation: checked 
+                    })
+                  }
+                  className="data-[state=checked]:bg-[#7E69AB]"
+                />
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => deleteContactMutation.mutate(contact.id)}
+              >
+                <Trash2 className="h-4 w-4 text-red-500" />
+              </Button>
+            </div>
           </div>
         ))}
       </div>
