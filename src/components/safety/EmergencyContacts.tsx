@@ -28,7 +28,15 @@ export function EmergencyContacts() {
         .order("created_at", { ascending: true });
       
       if (error) throw error;
-      return data as EmergencyContact[];
+      
+      // Ensure the data matches our type by mapping it
+      return (data || []).map(contact => ({
+        id: contact.id,
+        name: contact.name,
+        // Use the correct column name from the database
+        phone: contact.phone || contact["phone number"] || null,
+        email: contact.email
+      })) as EmergencyContact[];
     }
   });
 
@@ -37,7 +45,10 @@ export function EmergencyContacts() {
       const { error } = await supabase
         .from("emergency_contacts")
         .insert([{
-          ...newContact,
+          name: newContact.name,
+          // Ensure we're using the correct column name for the database
+          "phone number": newContact.phone,
+          email: newContact.email,
           user_id: (await supabase.auth.getUser()).data.user?.id
         }]);
       
@@ -52,6 +63,7 @@ export function EmergencyContacts() {
       });
     },
     onError: (error) => {
+      console.error("Error adding contact:", error);
       toast({
         title: "Error",
         description: "Failed to add emergency contact.",
@@ -75,6 +87,9 @@ export function EmergencyContacts() {
         title: "Contact Deleted",
         description: "Emergency contact has been removed.",
       });
+    },
+    onError: (error) => {
+      console.error("Error deleting contact:", error);
     }
   });
 

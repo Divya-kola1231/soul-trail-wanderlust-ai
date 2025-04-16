@@ -35,6 +35,9 @@ serve(async (req) => {
       { role: "user", content: message }
     ];
 
+    // Log for debugging
+    console.log('Calling OpenAI with messages:', JSON.stringify(messages));
+
     // Call OpenAI API
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -52,11 +55,14 @@ serve(async (req) => {
 
     if (!response.ok) {
       const error = await response.json();
+      console.error('OpenAI API error:', error);
       throw new Error(error.error?.message || 'Failed to generate a response');
     }
 
     const data = await response.json();
     const aiResponse = data.choices[0].message.content;
+
+    console.log('Received response from OpenAI:', aiResponse.substring(0, 100) + '...');
 
     return new Response(
       JSON.stringify({ reply: aiResponse }),
