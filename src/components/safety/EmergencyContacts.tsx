@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -122,6 +121,20 @@ export function EmergencyContacts() {
     }
   });
 
+  const handlePhoneCall = (phoneNumber: string | null) => {
+    if (!phoneNumber) {
+      toast({
+        title: "No Phone Number",
+        description: "This contact doesn't have a phone number.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const formattedNumber = phoneNumber.replace(/\D/g, '');
+    window.location.href = `tel:${formattedNumber}`;
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col md:flex-row gap-4">
@@ -157,7 +170,13 @@ export function EmergencyContacts() {
         ) : contacts?.map((contact) => (
           <div key={contact.id} className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200">
             <div className="flex items-center gap-3">
-              <Phone className="h-5 w-5 text-[#7E69AB]" />
+              <button 
+                onClick={() => handlePhoneCall(contact.phone)}
+                className="hover:bg-gray-100 p-2 rounded-full transition-colors"
+                title={contact.phone ? "Click to call" : "No phone number"}
+              >
+                <Phone className={`h-5 w-5 ${contact.phone ? 'text-[#7E69AB] cursor-pointer' : 'text-gray-400'}`} />
+              </button>
               <div>
                 <p className="font-medium">{contact.name}</p>
                 <div className="text-sm text-gray-500">
