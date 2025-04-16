@@ -36,7 +36,7 @@ serve(async (req) => {
     ];
 
     // Log for debugging
-    console.log('Calling OpenAI with messages:', JSON.stringify(messages));
+    console.log('Calling OpenAI with messages:', JSON.stringify(messages).substring(0, 200) + '...');
 
     // Call OpenAI API
     const response = await fetch('https://api.openai.com/v1/chat/completions', {

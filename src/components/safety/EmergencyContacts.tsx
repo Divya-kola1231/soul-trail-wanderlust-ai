@@ -34,7 +34,7 @@ export function EmergencyContacts() {
         id: contact.id,
         name: contact.name,
         // Use the correct column name from the database
-        phone: contact.phone || contact["phone number"] || null,
+        phone: contact["phone number"] ? String(contact["phone number"]) : null,
         email: contact.email
       })) as EmergencyContact[];
     }
@@ -42,12 +42,15 @@ export function EmergencyContacts() {
 
   const addContactMutation = useMutation({
     mutationFn: async () => {
+      // Convert phone to number if provided
+      const phoneNumber = newContact.phone ? Number(newContact.phone) : null;
+      
       const { error } = await supabase
         .from("emergency_contacts")
         .insert([{
           name: newContact.name,
           // Ensure we're using the correct column name for the database
-          "phone number": newContact.phone,
+          "phone number": phoneNumber,
           email: newContact.email,
           user_id: (await supabase.auth.getUser()).data.user?.id
         }]);
